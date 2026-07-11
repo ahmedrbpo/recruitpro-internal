@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RecruitPro.Application.Common.Interfaces;
 using RecruitPro.Domain.Common;
 using RecruitPro.Domain.Identity.Entities;
+using RecruitPro.Domain.Recruitment.Entities;
 
 namespace RecruitPro.Infrastructure.Persistence;
 
@@ -17,6 +18,16 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    public DbSet<Job> Jobs => Set<Job>();
+    public DbSet<JobSkill> JobSkills => Set<JobSkill>();
+    public DbSet<Department> Departments => Set<Department>();
+
+    public DbSet<Candidate> Candidates => Set<Candidate>();
+    public DbSet<Resume> Resumes => Set<Resume>();
+
+    public DbSet<JobApplication> Applications => Set<JobApplication>();
+    public DbSet<ApplicationStageHistory> ApplicationStageHistories => Set<ApplicationStageHistory>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
@@ -30,6 +41,13 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .GetMethod(nameof(ApplySoftDeleteFilter), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(entityType.ClrType)
                 .Invoke(null, [builder]);
+
+            // Every Id is generated client-side via Guid.NewGuid() in BaseEntity, never by the
+            // database. Without this, EF's change tracker can misjudge a child entity's state as
+            // Modified instead of Added when it's reachable only through navigation-collection
+            // fixup (e.g. JobApplication.MoveToStage() appending to its private history list) —
+            // a non-default key looks like "already exists" unless told otherwise.
+            builder.Entity(entityType.ClrType).Property(nameof(BaseEntity.Id)).ValueGeneratedNever();
         }
 
         base.OnModelCreating(builder);

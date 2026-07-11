@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using RecruitPro.Domain.Common.Exceptions;
 
 namespace RecruitPro.Api.Middleware;
 
@@ -19,6 +20,11 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
             await WriteProblemDetails(context, StatusCodes.Status400BadRequest, "validation_failed", "One or more validation errors occurred.", errors);
+        }
+        catch (DomainException ex)
+        {
+            // A business-rule invariant was violated (e.g. Job.Publish() without a salary range).
+            await WriteProblemDetails(context, StatusCodes.Status400BadRequest, "domain_rule_violation", ex.Message);
         }
         catch (Exception ex)
         {
