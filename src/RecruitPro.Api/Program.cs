@@ -38,19 +38,16 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
-if (string.IsNullOrEmpty(jwtSettings?.Secret))
-{
-    throw new InvalidOperationException(
-        "Jwt:Secret is not configured. Set it via `dotnet user-secrets set \"Jwt:Secret\" \"<value>\"` " +
-        "for local development, or the Jwt__Secret environment variable / Secrets Manager in other environments. " +
-        "It must never be committed to appsettings.json.");
-}
-
+// Read lazily inside the options callback (not eagerly here): WebApplicationFactory's test
+// config overrides are only merged into builder.Configuration during builder.Build(), so an
+// eager read at this point would miss them and see only "real" config sources.
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+            ?? throw new InvalidOperationException("Jwt configuration section is missing.");
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -69,6 +66,16 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Checked after Build(), not before: app.Configuration is the same ConfigurationManager as
+// builder.Configuration, but only fully merged (including any test-host overrides) by this point.
+if (string.IsNullOrEmpty(app.Configuration["Jwt:Secret"]))
+{
+    throw new InvalidOperationException(
+        "Jwt:Secret is not configured. Set it via `dotnet user-secrets set \"Jwt:Secret\" \"<value>\"` " +
+        "for local development, or the Jwt__Secret environment variable / Secrets Manager in other environments. " +
+        "It must never be committed to appsettings.json.");
+}
 
 // Registered first so it wraps every other middleware, including auth failures further down.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
