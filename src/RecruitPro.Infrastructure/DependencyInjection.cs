@@ -1,7 +1,10 @@
+using System.Net.Http.Headers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using RecruitPro.Application.Common.Interfaces;
+using RecruitPro.Infrastructure.Files;
 using RecruitPro.Infrastructure.Identity;
 using RecruitPro.Infrastructure.Persistence;
 using RecruitPro.Infrastructure.Persistence.Interceptors;
@@ -35,6 +38,14 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        services.Configure<SupabaseStorageOptions>(configuration.GetSection(SupabaseStorageOptions.SectionName));
+        services.AddHttpClient<IFileStorageService, SupabaseStorageFileStorageService>((sp, client) =>
+        {
+            var storageOptions = sp.GetRequiredService<IOptions<SupabaseStorageOptions>>().Value;
+            client.BaseAddress = new Uri(storageOptions.Url);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", storageOptions.ServiceRoleKey);
+        });
 
         return services;
     }

@@ -15,6 +15,21 @@ public abstract class ApiControllerBase : ControllerBase
         return StatusCodeFor(result, ApiResponse<T>.Fail(ToApiError(result)));
     }
 
+    /// <summary>Unwraps a paginated result into { data: items[], meta: { page, pageSize, totalCount } }
+    /// per the API envelope convention — takes priority over the generic overload above via
+    /// normal overload resolution when T is a PaginatedList.</summary>
+    protected ActionResult<ApiResponse<IReadOnlyCollection<T>>> HandleResult<T>(Result<PaginatedList<T>> result)
+    {
+        if (result.IsSuccess)
+        {
+            var page = result.Value!;
+            var meta = new { page.Page, page.PageSize, page.TotalCount };
+            return Ok(ApiResponse<IReadOnlyCollection<T>>.Ok(page.Items, meta));
+        }
+
+        return StatusCodeFor(result, ApiResponse<IReadOnlyCollection<T>>.Fail(ToApiError(result)));
+    }
+
     protected ActionResult<ApiResponse<object>> HandleResult(Result result)
     {
         if (result.IsSuccess)
