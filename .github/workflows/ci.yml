@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
   build-and-test:
@@ -26,12 +26,12 @@ jobs:
       - name: Run unit and integration tests
         run: dotnet test --no-build --configuration Release
 
-  # Placeholder: builds and pushes the API image to GHCR on merge to main. The
+  # Placeholder: builds and pushes the API image to GHCR on merge to master. The
   # migrate-then-deploy step against the real MonsterASP.NET target still needs to be filled in
   # once hosting credentials exist — do not add fabricated secrets/deploy steps ahead of that.
   build-image:
     needs: build-and-test
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: read
