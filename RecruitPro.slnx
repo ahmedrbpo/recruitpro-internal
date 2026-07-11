@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RecruitPro.Api/RecruitPro.Api.csproj" />
+    <Project Path="src/RecruitPro.Application/RecruitPro.Application.csproj" />
+    <Project Path="src/RecruitPro.Domain/RecruitPro.Domain.csproj" />
+    <Project Path="src/RecruitPro.Infrastructure/RecruitPro.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RecruitPro.Api.IntegrationTests/RecruitPro.Api.IntegrationTests.csproj" />
+    <Project Path="tests/RecruitPro.Application.Tests/RecruitPro.Application.Tests.csproj" />
+    <Project Path="tests/RecruitPro.Domain.Tests/RecruitPro.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,88 @@
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using RecruitPro.Application.Common.Interfaces;
+using RecruitPro.Domain.Common;
+using RecruitPro.Domain.Identity.Entities;
+
+namespace RecruitPro.Infrastructure.Persistence.Interceptors;
+
+/// <summary>
+/// Stamps CreatedAt/By and ModifiedAt/By automatically, assigns a fresh RowVersion on every
+/// write (Postgres bytea columns don't auto-increment the way SQL Server ROWVERSION does, so the
+/// app must generate the new concurrency-token value itself), and writes an AuditLog row per
+/// entity change with a before/after diff — all without per-handler boilerplate.
+/// </summary>
+public sealed class AuditableEntitySaveChangesInterceptor(
+    ICurrentUserService currentUserService,
+    IDateTimeProvider dateTimeProvider)
+    : SaveChangesInterceptor
+{
+    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+    {
+        UpdateEntities(eventData.Context);
+        return base.SavingChanges(eventData, result);
+    }
+
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+    {
+        UpdateEntities(eventData.Context);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
+    }
+
+    private void UpdateEntities(DbContext? context)
+    {
+        if (context is null) return;
+
+        var now = dateTimeProvider.UtcNow;
+        var userId = currentUserService.UserId;
+        var auditLogs = new List<AuditLog>();
+
+        foreach (var entry in context.ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State is not (EntityState.Added or EntityState.Modified))
+                continue;
+
+            entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();
+
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = now;
+                entry.Entity.CreatedBy = userId;
+                auditLogs.Add(BuildAuditLog(entry, "Created", SerializeCurrentValues(entry), now, userId));
+                continue;
+            }
+
+            entry.Entity.ModifiedAt = now;
+            entry.Entity.ModifiedBy = userId;
+
+            // SoftDeleteInterceptor turns a Remove() into IsDeleted flipping true here — log
+            // that as "Deleted", not "Modified".
+            var isSoftDelete = entry.Property(nameof(BaseEntity.IsDeleted)).IsModified && entry.Entity.IsDeleted;
+            auditLogs.Add(BuildAuditLog(entry, isSoftDelete ? "Deleted" : "Modified", SerializeChangedProperties(entry), now, userId));
+        }
+
+        foreach (var log in auditLogs)
+            context.Set<AuditLog>().Add(log);
+    }
+
+    private static AuditLog BuildAuditLog(EntityEntry<BaseEntity> entry, string action, string changes, DateTimeOffset now, Guid? userId) =>
+        AuditLog.Create(entry.Entity.GetType().Name, entry.Entity.Id, action, changes, userId, now);
+
+    private static string SerializeChangedProperties(EntityEntry<BaseEntity> entry)
+    {
+        var diff = entry.Properties
+            .Where(p => p.IsModified)
+            .ToDictionary(p => p.Metadata.Name, p => new { Old = p.OriginalValue, New = p.CurrentValue });
+
+        return JsonSerializer.Serialize(diff);
+    }
+
+    private static string SerializeCurrentValues(EntityEntry<BaseEntity> entry)
+    {
+        var values = entry.Properties.ToDictionary(p => p.Metadata.Name, p => p.CurrentValue);
+        return JsonSerializer.Serialize(values);
+    }
+}
