@@ -1,4 +1,5 @@
 using System.Text;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -7,6 +8,7 @@ using RecruitPro.Api.Authorization;
 using RecruitPro.Api.Middleware;
 using RecruitPro.Application;
 using RecruitPro.Infrastructure;
+using RecruitPro.Infrastructure.BackgroundJobs;
 using RecruitPro.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -98,6 +100,16 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = [new HangfireDashboardAuthorizationFilter()],
+});
+
+RecurringJob.AddOrUpdate<ProcessPendingNotificationsJob>(
+    "process-pending-notifications",
+    job => job.ExecuteAsync(CancellationToken.None),
+    Cron.Minutely());
 
 app.Run();
 

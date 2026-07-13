@@ -1,6 +1,7 @@
 using FluentAssertions;
 using RecruitPro.Domain.Common.Exceptions;
 using RecruitPro.Domain.Recruitment.Entities;
+using RecruitPro.Domain.Recruitment.Events;
 using Xunit;
 
 namespace RecruitPro.Domain.Tests.Recruitment;
@@ -10,6 +11,20 @@ public sealed class InterviewTests
     private static readonly DateTimeOffset ScheduledAt = new(2026, 1, 10, 10, 0, 0, TimeSpan.Zero);
 
     private static Interview Schedule() => Interview.Schedule(Guid.NewGuid(), ScheduledAt, InterviewMode.Video, round: 1);
+
+    [Fact]
+    public void Schedule_RaisesInterviewScheduledEvent()
+    {
+        var interview = Schedule();
+
+        var domainEvent = Assert.Single(interview.DomainEvents) as InterviewScheduledEvent;
+
+        domainEvent.Should().NotBeNull();
+        domainEvent!.InterviewId.Should().Be(interview.Id);
+        domainEvent.ScheduledAt.Should().Be(ScheduledAt);
+        domainEvent.Mode.Should().Be(InterviewMode.Video);
+        domainEvent.Round.Should().Be(1);
+    }
 
     [Fact]
     public void Reschedule_WhileScheduled_UpdatesScheduledAt()
