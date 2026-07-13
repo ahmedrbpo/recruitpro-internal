@@ -51,7 +51,7 @@ public sealed class AuditableEntitySaveChangesInterceptor(
             {
                 entry.Entity.CreatedAt = now;
                 entry.Entity.CreatedBy = userId;
-                auditLogs.Add(BuildAuditLog(entry, "Created", SerializeCurrentValues(entry), now, userId));
+                auditLogs.Add(BuildAuditLog(entry, AuditAction.Create, SerializeCurrentValues(entry), now, userId));
                 continue;
             }
 
@@ -59,16 +59,16 @@ public sealed class AuditableEntitySaveChangesInterceptor(
             entry.Entity.ModifiedBy = userId;
 
             // SoftDeleteInterceptor turns a Remove() into IsDeleted flipping true here — log
-            // that as "Deleted", not "Modified".
+            // that as Delete, not Update.
             var isSoftDelete = entry.Property(nameof(BaseEntity.IsDeleted)).IsModified && entry.Entity.IsDeleted;
-            auditLogs.Add(BuildAuditLog(entry, isSoftDelete ? "Deleted" : "Modified", SerializeChangedProperties(entry), now, userId));
+            auditLogs.Add(BuildAuditLog(entry, isSoftDelete ? AuditAction.Delete : AuditAction.Update, SerializeChangedProperties(entry), now, userId));
         }
 
         foreach (var log in auditLogs)
             context.Set<AuditLog>().Add(log);
     }
 
-    private static AuditLog BuildAuditLog(EntityEntry<BaseEntity> entry, string action, string changes, DateTimeOffset now, Guid? userId) =>
+    private static AuditLog BuildAuditLog(EntityEntry<BaseEntity> entry, AuditAction action, string changes, DateTimeOffset now, Guid? userId) =>
         AuditLog.Create(entry.Entity.GetType().Name, entry.Entity.Id, action, changes, userId, now);
 
     private static string SerializeChangedProperties(EntityEntry<BaseEntity> entry)

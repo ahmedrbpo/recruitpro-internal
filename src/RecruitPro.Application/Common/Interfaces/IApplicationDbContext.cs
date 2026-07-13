@@ -16,7 +16,12 @@ public interface IApplicationDbContext
 
     DbSet<Job> Jobs { get; }
     DbSet<JobSkill> JobSkills { get; }
+    DbSet<Skill> Skills { get; }
     DbSet<Department> Departments { get; }
+    DbSet<JobCategory> JobCategories { get; }
+    DbSet<Client> Clients { get; }
+    DbSet<Recruiter> Recruiters { get; }
+    DbSet<Tag> Tags { get; }
 
     DbSet<Candidate> Candidates { get; }
     DbSet<Resume> Resumes { get; }

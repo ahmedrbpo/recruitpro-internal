@@ -11,10 +11,10 @@ public sealed class GetJobsPaginatedQueryHandler(IApplicationDbContext db)
 {
     public async Task<Result<PaginatedList<JobDto>>> Handle(GetJobsPaginatedQuery request, CancellationToken cancellationToken)
     {
-        var query = db.Jobs.AsNoTracking().Include(j => j.Skills).AsQueryable();
+        var query = db.Jobs.AsNoTracking().Include(j => j.Skills).ThenInclude(js => js.Skill).AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(request.Status))
-            query = query.Where(j => j.Status == request.Status);
+        if (request.Status.HasValue)
+            query = query.Where(j => j.Status == request.Status.Value);
 
         query = query.OrderByDescending(j => j.CreatedAt);
 

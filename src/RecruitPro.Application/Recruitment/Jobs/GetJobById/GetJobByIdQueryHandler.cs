@@ -10,7 +10,7 @@ public sealed class GetJobByIdQueryHandler(IApplicationDbContext db) : IRequestH
 {
     public async Task<Result<JobDto>> Handle(GetJobByIdQuery request, CancellationToken cancellationToken)
     {
-        var job = await db.Jobs.AsNoTracking().Include(j => j.Skills)
+        var job = await db.Jobs.AsNoTracking().Include(j => j.Skills).ThenInclude(js => js.Skill)
             .SingleOrDefaultAsync(j => j.Id == request.JobId, cancellationToken);
 
         return job is null ? Result<JobDto>.NotFound() : Result<JobDto>.Success(JobDto.FromEntity(job));

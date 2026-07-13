@@ -10,6 +10,8 @@ public abstract class BaseEntity
     public Guid? ModifiedBy { get; set; }
 
     public bool IsDeleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+    public Guid? DeletedBy { get; set; }
 
     // EF Core concurrency token; mapped to a `bytea` column via Npgsql's xmin-style rowversion.
     public byte[] RowVersion { get; set; } = [];

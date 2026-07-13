@@ -40,11 +40,27 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)")
                         .HasColumnName("email");
+
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("email_verified");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -60,8 +76,11 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
+                    b.Property<DateTimeOffset?>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_login_at");
+
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("last_name");
@@ -93,14 +112,30 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password_hash");
 
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("phone");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("row_version");
 
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("two_factor_enabled");
+
+                    b.Property<Guid>("UserExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_ext_id");
+
                     b.HasKey("Id")
                         .HasName("pk_users");
+
+                    b.HasIndex("DepartmentId")
+                        .HasDatabaseName("ix_users_department_id");
 
                     b.HasIndex("IsActive")
                         .HasDatabaseName("ix_users_is_active")
@@ -110,6 +145,10 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_users_normalized_email")
                         .HasFilter("is_deleted = false");
+
+                    b.HasIndex("UserExtId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_user_ext_id");
 
                     b.ToTable("users", (string)null);
                 });
@@ -123,8 +162,8 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
                         .HasColumnName("action");
 
                     b.Property<string>("Changes")
@@ -167,6 +206,11 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Action")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("action");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -175,10 +219,22 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -198,6 +254,15 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
+                    b.Property<Guid>("PermissionExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("permission_ext_id");
+
+                    b.Property<string>("Resource")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("resource");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -211,6 +276,10 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_permissions_name")
                         .HasFilter("is_deleted = false");
+
+                    b.HasIndex("PermissionExtId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_permissions_permission_ext_id");
 
                     b.ToTable("permissions", (string)null);
                 });
@@ -228,6 +297,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
 
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
@@ -289,6 +366,12 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("code");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -297,14 +380,30 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_system");
 
                     b.Property<DateTimeOffset?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone")
@@ -320,6 +419,10 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<Guid>("RoleExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_ext_id");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
@@ -329,10 +432,19 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_roles");
 
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_roles_code")
+                        .HasFilter("is_deleted = false");
+
                     b.HasIndex("Name")
                         .IsUnique()
                         .HasDatabaseName("ix_roles_name")
                         .HasFilter("is_deleted = false");
+
+                    b.HasIndex("RoleExtId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_roles_role_ext_id");
 
                     b.ToTable("roles", (string)null);
                 });
@@ -350,6 +462,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -404,6 +524,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -471,6 +599,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
                     b.Property<string>("FromStage")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -524,6 +660,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(320)
@@ -575,11 +719,31 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.ToTable("candidates", (string)null);
                 });
 
-            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Department", b =>
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Client", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("city");
+
+                    b.Property<Guid>("ClientExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_ext_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("country");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -588,6 +752,43 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
+
+                    b.Property<string>("CurrencyCode")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency_code");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("GSTNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("gst_number");
+
+                    b.Property<string>("HQCountry")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("hq_country");
+
+                    b.Property<string>("Industry")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("industry");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -603,9 +804,23 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
                         .HasColumnName("name");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("postal_code");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -613,18 +828,42 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("row_version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_departments");
+                    b.Property<string>("State")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("state");
 
-                    b.HasIndex("Name")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("type");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("website");
+
+                    b.HasKey("Id")
+                        .HasName("pk_clients");
+
+                    b.HasIndex("ClientExtId")
                         .IsUnique()
-                        .HasDatabaseName("ix_departments_name")
+                        .HasDatabaseName("ix_clients_client_ext_id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_clients_code")
                         .HasFilter("is_deleted = false");
 
-                    b.ToTable("departments", (string)null);
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("ix_clients_is_active")
+                        .HasFilter("is_deleted = false");
+
+                    b.ToTable("clients", (string)null);
                 });
 
-            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Job", b =>
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Department", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -638,13 +877,38 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
 
-                    b.Property<Guid?>("DepartmentId")
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid")
-                        .HasColumnName("department_id");
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("DepartmentCode")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("department_code");
+
+                    b.Property<Guid>("DepartmentExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_ext_id");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
+
+                    b.Property<Guid?>("ManagerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("manager_id");
 
                     b.Property<DateTimeOffset?>("ModifiedAt")
                         .HasColumnType("timestamp with time zone")
@@ -653,6 +917,132 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("ModifiedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("ParentDepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_department_id");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("row_version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_departments");
+
+                    b.HasIndex("DepartmentExtId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_departments_department_ext_id");
+
+                    b.HasIndex("ManagerId")
+                        .HasDatabaseName("ix_departments_manager_id");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_departments_name")
+                        .HasFilter("is_deleted = false");
+
+                    b.HasIndex("ParentDepartmentId")
+                        .HasDatabaseName("ix_departments_parent_department_id");
+
+                    b.ToTable("departments", (string)null);
+                });
+
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Job", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("client_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CurrencyCode")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency_code");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("EmploymentType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("employment_type");
+
+                    b.Property<decimal>("ExperienceMax")
+                        .HasColumnType("numeric(4,1)")
+                        .HasColumnName("experience_max");
+
+                    b.Property<decimal>("ExperienceMin")
+                        .HasColumnType("numeric(4,1)")
+                        .HasColumnName("experience_min");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<Guid?>("JobCategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_category_id");
+
+                    b.Property<string>("JobCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("job_code");
+
+                    b.Property<DateTimeOffset?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<DateOnly?>("PublishedDate")
+                        .HasColumnType("date")
+                        .HasColumnName("published_date");
+
+                    b.Property<Guid?>("RecruiterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recruiter_id");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -680,11 +1070,31 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(300)")
                         .HasColumnName("title");
 
+                    b.Property<string>("WorkMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("work_mode");
+
                     b.HasKey("Id")
                         .HasName("pk_jobs");
 
+                    b.HasIndex("ClientId")
+                        .HasDatabaseName("ix_jobs_client_id");
+
                     b.HasIndex("DepartmentId")
                         .HasDatabaseName("ix_jobs_department_id");
+
+                    b.HasIndex("JobCategoryId")
+                        .HasDatabaseName("ix_jobs_job_category_id");
+
+                    b.HasIndex("JobCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_jobs_job_code")
+                        .HasFilter("is_deleted = false");
+
+                    b.HasIndex("RecruiterId")
+                        .HasDatabaseName("ix_jobs_recruiter_id");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("ix_jobs_status")
@@ -710,6 +1120,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -755,6 +1173,71 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.ToTable("applications", (string)null);
                 });
 
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.JobCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("row_version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_job_categories");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_job_categories_name")
+                        .HasFilter("is_deleted = false");
+
+                    b.ToTable("job_categories", (string)null);
+                });
+
             modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.JobSkill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -768,6 +1251,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean")
@@ -785,11 +1276,97 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("modified_by");
 
-                    b.Property<string>("Name")
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
+                        .HasColumnType("bytea")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("skill_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_job_skills");
+
+                    b.HasIndex("SkillId")
+                        .HasDatabaseName("ix_job_skills_skill_id");
+
+                    b.HasIndex("JobId", "SkillId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_job_skills_job_id_skill_id")
+                        .HasFilter("is_deleted = false");
+
+                    b.ToTable("job_skills", (string)null);
+                });
+
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Recruiter", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("City")
+                        .HasColumnType("text")
+                        .HasColumnName("city");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("text")
+                        .HasColumnName("country");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Mobile")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("mobile");
+
+                    b.Property<DateTimeOffset?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("PAN")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("pan");
+
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("text")
+                        .HasColumnName("postal_code");
+
+                    b.Property<Guid>("RecruiterExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recruiter_ext_id");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -797,15 +1374,34 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("row_version");
 
-                    b.HasKey("Id")
-                        .HasName("pk_job_skills");
+                    b.Property<string>("State")
+                        .HasColumnType("text")
+                        .HasColumnName("state");
 
-                    b.HasIndex("JobId", "Name")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("VendorCompany")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("vendor_company");
+
+                    b.HasKey("Id")
+                        .HasName("pk_recruiters");
+
+                    b.HasIndex("UserId")
                         .IsUnique()
-                        .HasDatabaseName("ix_job_skills_job_id_name")
+                        .HasDatabaseName("ix_recruiters_user_id")
                         .HasFilter("is_deleted = false");
 
-                    b.ToTable("job_skills", (string)null);
+                    b.ToTable("recruiters", (string)null);
                 });
 
             modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Resume", b =>
@@ -835,6 +1431,14 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
 
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("boolean")
@@ -885,6 +1489,171 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_resumes_object_key");
 
                     b.ToTable("resumes", (string)null);
+                });
+
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Skill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid>("SkillExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("skill_ext_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_skills");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_skills_name")
+                        .HasFilter("is_deleted = false");
+
+                    b.ToTable("skills", (string)null);
+                });
+
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("color");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid>("TagExtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tag_ext_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_tags");
+
+                    b.HasIndex("Name", "Category")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tags_name_category")
+                        .HasFilter("is_deleted = false");
+
+                    b.ToTable("tags", (string)null);
+                });
+
+            modelBuilder.Entity("RecruitPro.Domain.Identity.Entities.ApplicationUser", b =>
+                {
+                    b.HasOne("RecruitPro.Domain.Recruitment.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_users_departments_department_id");
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("RecruitPro.Domain.Identity.Entities.RefreshToken", b =>
@@ -953,13 +1722,46 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                     b.Navigation("Application");
                 });
 
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Department", b =>
+                {
+                    b.HasOne("RecruitPro.Domain.Identity.Entities.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_departments_users_manager_id");
+
+                    b.HasOne("RecruitPro.Domain.Recruitment.Entities.Department", null)
+                        .WithMany()
+                        .HasForeignKey("ParentDepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_departments_departments_parent_department_id");
+                });
+
             modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Job", b =>
                 {
+                    b.HasOne("RecruitPro.Domain.Recruitment.Entities.Client", null)
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_jobs_clients_client_id");
+
                     b.HasOne("RecruitPro.Domain.Recruitment.Entities.Department", null)
                         .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_jobs_departments_department_id");
+
+                    b.HasOne("RecruitPro.Domain.Recruitment.Entities.JobCategory", null)
+                        .WithMany()
+                        .HasForeignKey("JobCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_jobs_job_categories_job_category_id");
+
+                    b.HasOne("RecruitPro.Domain.Recruitment.Entities.Recruiter", null)
+                        .WithMany()
+                        .HasForeignKey("RecruiterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_jobs_recruiters_recruiter_id");
                 });
 
             modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.JobApplication", b =>
@@ -992,7 +1794,28 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_job_skills_jobs_job_id");
 
+                    b.HasOne("RecruitPro.Domain.Recruitment.Entities.Skill", "Skill")
+                        .WithMany()
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_job_skills_skills_skill_id");
+
                     b.Navigation("Job");
+
+                    b.Navigation("Skill");
+                });
+
+            modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Recruiter", b =>
+                {
+                    b.HasOne("RecruitPro.Domain.Identity.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recruiters_users_user_id");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RecruitPro.Domain.Recruitment.Entities.Resume", b =>

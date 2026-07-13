@@ -71,9 +71,10 @@ public sealed class ApplicationUserTests
         user.RegisterFailedLoginAttempt(Now);
         user.RegisterFailedLoginAttempt(Now);
 
-        user.RegisterSuccessfulLogin();
+        user.RegisterSuccessfulLogin(Now);
 
         user.AccessFailedCount.Should().Be(0);
         user.IsLockedOut(Now).Should().BeFalse();
+        user.LastLoginAt.Should().Be(Now);
     }
 }
