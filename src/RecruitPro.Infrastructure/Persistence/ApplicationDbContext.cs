@@ -33,6 +33,10 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<JobApplication> Applications => Set<JobApplication>();
     public DbSet<ApplicationStageHistory> ApplicationStageHistories => Set<ApplicationStageHistory>();
 
+    public DbSet<Interview> Interviews => Set<Interview>();
+    public DbSet<InterviewFeedback> InterviewFeedbacks => Set<InterviewFeedback>();
+    public DbSet<Offer> Offers => Set<Offer>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

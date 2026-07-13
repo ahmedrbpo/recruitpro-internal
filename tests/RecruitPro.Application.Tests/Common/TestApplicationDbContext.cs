@@ -37,6 +37,10 @@ public sealed class TestApplicationDbContext(DbContextOptions<TestApplicationDbC
     public DbSet<JobApplication> Applications => Set<JobApplication>();
     public DbSet<ApplicationStageHistory> ApplicationStageHistories => Set<ApplicationStageHistory>();
 
+    public DbSet<Interview> Interviews => Set<Interview>();
+    public DbSet<InterviewFeedback> InterviewFeedbacks => Set<InterviewFeedback>();
+    public DbSet<Offer> Offers => Set<Offer>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         // Every Id is generated client-side via Guid.NewGuid() in BaseEntity, never by the
