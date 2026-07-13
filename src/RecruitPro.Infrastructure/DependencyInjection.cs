@@ -1,9 +1,13 @@
 using System.Net.Http.Headers;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using RecruitPro.Application.Common.Interfaces;
+using RecruitPro.Infrastructure.BackgroundJobs;
+using RecruitPro.Infrastructure.Email;
 using RecruitPro.Infrastructure.Files;
 using RecruitPro.Infrastructure.Identity;
 using RecruitPro.Infrastructure.Persistence;
@@ -19,6 +23,7 @@ public static class DependencyInjection
         // ICurrentUserService (which reads the current HttpContext).
         services.AddScoped<SoftDeleteInterceptor>();
         services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+        services.AddScoped<DomainEventDispatchInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
@@ -26,7 +31,8 @@ public static class DependencyInjection
             options.UseSnakeCaseNamingConvention();
             options.AddInterceptors(
                 sp.GetRequiredService<SoftDeleteInterceptor>(),
-                sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>());
+                sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>(),
+                sp.GetRequiredService<DomainEventDispatchInterceptor>());
         });
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
@@ -46,6 +52,24 @@ public static class DependencyInjection
             client.BaseAddress = new Uri(storageOptions.Url);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", storageOptions.ServiceRoleKey);
         });
+
+        services.Configure<SendGridOptions>(configuration.GetSection(SendGridOptions.SectionName));
+        services.AddHttpClient<IEmailService, SendGridEmailService>((sp, client) =>
+        {
+            var sendGridOptions = sp.GetRequiredService<IOptions<SendGridOptions>>().Value;
+            client.BaseAddress = new Uri("https://api.sendgrid.com");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sendGridOptions.ApiKey);
+        });
+
+        // Same PostgreSQL database as the application data, per the blueprint's "no separate
+        // infra" decision for background jobs at this stage.
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(configuration.GetConnectionString("Default"))));
+        services.AddHangfireServer();
+        services.AddScoped<ProcessPendingNotificationsJob>();
 
         return services;
     }

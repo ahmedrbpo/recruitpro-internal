@@ -1,6 +1,7 @@
 using FluentAssertions;
 using RecruitPro.Domain.Common.Exceptions;
 using RecruitPro.Domain.Recruitment.Entities;
+using RecruitPro.Domain.Recruitment.Events;
 using Xunit;
 
 namespace RecruitPro.Domain.Tests.Recruitment;
@@ -19,6 +20,22 @@ public sealed class OfferTests
         offer.Extend();
 
         offer.Status.Should().Be(OfferStatus.Extended);
+    }
+
+    [Fact]
+    public void Extend_WhileDraft_RaisesOfferExtendedEvent()
+    {
+        var offer = CreateOffer();
+
+        offer.Extend();
+
+        var domainEvent = Assert.Single(offer.DomainEvents) as OfferExtendedEvent;
+
+        domainEvent.Should().NotBeNull();
+        domainEvent!.OfferId.Should().Be(offer.Id);
+        domainEvent.ApplicationId.Should().Be(offer.ApplicationId);
+        domainEvent.OfferedSalary.Should().Be(2_000_000);
+        domainEvent.CurrencyCode.Should().Be("INR");
     }
 
     [Fact]

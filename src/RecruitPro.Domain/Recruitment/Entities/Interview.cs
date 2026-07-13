@@ -1,6 +1,7 @@
 using RecruitPro.Domain.Common;
 using RecruitPro.Domain.Common.Exceptions;
 using RecruitPro.Domain.Identity.Entities;
+using RecruitPro.Domain.Recruitment.Events;
 
 namespace RecruitPro.Domain.Recruitment.Entities;
 
@@ -31,8 +32,9 @@ public sealed class Interview : BaseEntity
         int round,
         Guid? interviewerId = null,
         int? durationMinutes = null,
-        string? notes = null) =>
-        new()
+        string? notes = null)
+    {
+        var interview = new Interview
         {
             ApplicationId = applicationId,
             ScheduledAt = scheduledAt,
@@ -42,6 +44,9 @@ public sealed class Interview : BaseEntity
             DurationMinutes = durationMinutes,
             Notes = notes,
         };
+        interview.AddDomainEvent(new InterviewScheduledEvent(interview.Id, applicationId, scheduledAt, mode, round));
+        return interview;
+    }
 
     public void Reschedule(DateTimeOffset newScheduledAt)
     {

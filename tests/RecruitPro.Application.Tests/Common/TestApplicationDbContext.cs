@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RecruitPro.Application.Common.Interfaces;
 using RecruitPro.Domain.Common;
 using RecruitPro.Domain.Identity.Entities;
+using RecruitPro.Domain.Notifications.Entities;
 using RecruitPro.Domain.Recruitment.Entities;
 
 namespace RecruitPro.Application.Tests.Common;
@@ -40,6 +41,9 @@ public sealed class TestApplicationDbContext(DbContextOptions<TestApplicationDbC
     public DbSet<Interview> Interviews => Set<Interview>();
     public DbSet<InterviewFeedback> InterviewFeedbacks => Set<InterviewFeedback>();
     public DbSet<Offer> Offers => Set<Offer>();
+
+    public DbSet<NotificationTemplate> NotificationTemplates => Set<NotificationTemplate>();
+    public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

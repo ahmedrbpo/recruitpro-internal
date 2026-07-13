@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RecruitPro.Domain.Identity.Entities;
+using RecruitPro.Domain.Notifications.Entities;
 using RecruitPro.Domain.Recruitment.Entities;
 
 namespace RecruitPro.Application.Common.Interfaces;
@@ -32,6 +33,9 @@ public interface IApplicationDbContext
     DbSet<Interview> Interviews { get; }
     DbSet<InterviewFeedback> InterviewFeedbacks { get; }
     DbSet<Offer> Offers { get; }
+
+    DbSet<NotificationTemplate> NotificationTemplates { get; }
+    DbSet<NotificationLog> NotificationLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using RecruitPro.Domain.Common.Exceptions;
 using RecruitPro.Domain.Recruitment.Entities;
+using RecruitPro.Domain.Recruitment.Events;
 using RecruitPro.Domain.Recruitment.ValueObjects;
 using Xunit;
 
@@ -9,6 +10,33 @@ namespace RecruitPro.Domain.Tests.Recruitment;
 public sealed class JobApplicationTests
 {
     private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
+
+    [Fact]
+    public void Create_RaisesApplicationStageChangedEventWithNullPreviousStage()
+    {
+        var application = JobApplication.Create(Guid.NewGuid(), Guid.NewGuid());
+
+        var domainEvent = Assert.Single(application.DomainEvents) as ApplicationStageChangedEvent;
+
+        domainEvent.Should().NotBeNull();
+        domainEvent!.PreviousStage.Should().BeNull();
+        domainEvent.NewStage.Should().Be(ApplicationStage.Applied);
+    }
+
+    [Fact]
+    public void MoveToStage_RaisesApplicationStageChangedEventWithPreviousAndNewStage()
+    {
+        var application = JobApplication.Create(Guid.NewGuid(), Guid.NewGuid());
+        application.ClearDomainEvents();
+
+        application.MoveToStage(ApplicationStage.Screening, Now, changedBy: null);
+
+        var domainEvent = Assert.Single(application.DomainEvents) as ApplicationStageChangedEvent;
+
+        domainEvent.Should().NotBeNull();
+        domainEvent!.PreviousStage.Should().Be(ApplicationStage.Applied);
+        domainEvent.NewStage.Should().Be(ApplicationStage.Screening);
+    }
 
     [Theory]
     [InlineData(ApplicationStage.Applied, ApplicationStage.Screening)]

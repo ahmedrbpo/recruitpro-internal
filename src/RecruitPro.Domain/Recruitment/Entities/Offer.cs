@@ -1,5 +1,6 @@
 using RecruitPro.Domain.Common;
 using RecruitPro.Domain.Common.Exceptions;
+using RecruitPro.Domain.Recruitment.Events;
 
 namespace RecruitPro.Domain.Recruitment.Entities;
 
@@ -46,6 +47,7 @@ public sealed class Offer : BaseEntity
             throw new OfferStateTransitionException("extend", $"it is {Status}, not Draft");
 
         Status = OfferStatus.Extended;
+        AddDomainEvent(new OfferExtendedEvent(Id, ApplicationId, OfferedSalary, CurrencyCode));
     }
 
     public void Accept()

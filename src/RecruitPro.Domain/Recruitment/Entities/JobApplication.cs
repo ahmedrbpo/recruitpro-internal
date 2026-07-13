@@ -1,5 +1,6 @@
 using RecruitPro.Domain.Common;
 using RecruitPro.Domain.Common.Exceptions;
+using RecruitPro.Domain.Recruitment.Events;
 using RecruitPro.Domain.Recruitment.ValueObjects;
 
 namespace RecruitPro.Domain.Recruitment.Entities;
@@ -26,8 +27,12 @@ public sealed class JobApplication : BaseEntity
 
     private JobApplication() { } // EF Core
 
-    public static JobApplication Create(Guid jobId, Guid candidateId) =>
-        new() { JobId = jobId, CandidateId = candidateId };
+    public static JobApplication Create(Guid jobId, Guid candidateId)
+    {
+        var application = new JobApplication { JobId = jobId, CandidateId = candidateId };
+        application.AddDomainEvent(new ApplicationStageChangedEvent(application.Id, candidateId, jobId, null, application.Stage));
+        return application;
+    }
 
     /// <summary>Enforces the fixed pipeline shape: rejects transitions that skip a stage,
     /// reverse the pipeline, or move out of a terminal stage.</summary>
@@ -39,7 +44,9 @@ public sealed class JobApplication : BaseEntity
         if (!ApplicationStage.IsValidTransition(Stage, newStage))
             throw new ApplicationStageTransitionException(Stage, newStage, "that transition skips a stage or reverses the pipeline");
 
+        var previousStage = Stage;
         _stageHistory.Add(ApplicationStageHistory.Create(Id, Stage, newStage, now, changedBy));
         Stage = newStage;
+        AddDomainEvent(new ApplicationStageChangedEvent(Id, CandidateId, JobId, previousStage, newStage));
     }
 }
