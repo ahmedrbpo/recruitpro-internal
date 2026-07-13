@@ -6,9 +6,10 @@ public sealed class JobSkill : BaseEntity
 {
     public Guid JobId { get; private set; }
     public Job? Job { get; private set; }
-    public string Name { get; private set; } = default!;
+    public Guid SkillId { get; private set; }
+    public Skill? Skill { get; private set; }
 
     private JobSkill() { } // EF Core
 
-    public static JobSkill Create(Guid jobId, string name) => new() { JobId = jobId, Name = name };
+    public static JobSkill Create(Guid jobId, Guid skillId) => new() { JobId = jobId, SkillId = skillId };
 }

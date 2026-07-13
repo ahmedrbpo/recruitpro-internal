@@ -12,10 +12,13 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.HasKey(r => r.Id);
 
         builder.Property(r => r.Name).HasMaxLength(100).IsRequired();
+        builder.Property(r => r.Code).HasMaxLength(30).IsRequired();
         builder.Property(r => r.Description).HasMaxLength(500);
         builder.Property(r => r.RowVersion).IsConcurrencyToken();
 
+        builder.HasIndex(r => r.RoleExtId).IsUnique();
         builder.HasIndex(r => r.Name).IsUnique().HasFilter("is_deleted = false");
+        builder.HasIndex(r => r.Code).IsUnique().HasFilter("is_deleted = false");
 
         builder.HasMany(r => r.RolePermissions)
             .WithOne(rp => rp.Role)

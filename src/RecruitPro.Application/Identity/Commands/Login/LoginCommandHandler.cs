@@ -55,7 +55,7 @@ public sealed class LoginCommandHandler(
             return Result<AuthTokensDto>.Unauthorized(invalidCredentialsMessage);
         }
 
-        user.RegisterSuccessfulLogin();
+        user.RegisterSuccessfulLogin(now);
 
         var permissions = user.GetPermissionNames().ToList();
         var accessToken = jwtTokenService.GenerateAccessToken(user, permissions);

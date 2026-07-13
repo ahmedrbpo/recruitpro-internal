@@ -12,9 +12,12 @@ public sealed class PermissionConfiguration : IEntityTypeConfiguration<Permissio
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Name).HasMaxLength(200).IsRequired();
+        builder.Property(p => p.Resource).HasMaxLength(100);
+        builder.Property(p => p.Action).HasConversion<string>().HasMaxLength(30);
         builder.Property(p => p.Description).HasMaxLength(500);
         builder.Property(p => p.RowVersion).IsConcurrencyToken();
 
+        builder.HasIndex(p => p.PermissionExtId).IsUnique();
         builder.HasIndex(p => p.Name).IsUnique().HasFilter("is_deleted = false");
 
         builder.HasMany(p => p.RolePermissions)

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RecruitPro.Domain.Identity.Entities;
+using RecruitPro.Domain.Recruitment.Entities;
 
 namespace RecruitPro.Infrastructure.Persistence.Configurations;
 
@@ -15,15 +16,19 @@ public sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Appl
         builder.Property(u => u.NormalizedEmail).HasMaxLength(320).IsRequired();
         builder.Property(u => u.PasswordHash).IsRequired();
         builder.Property(u => u.FirstName).HasMaxLength(100).IsRequired();
-        builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
+        builder.Property(u => u.LastName).HasMaxLength(100);
+        builder.Property(u => u.Phone).HasMaxLength(20);
         builder.Property(u => u.RowVersion).IsConcurrencyToken();
 
-        // Partial unique index: soft-deleted users free up their email for reuse.
-        builder.HasIndex(u => u.NormalizedEmail)
-            .IsUnique()
-            .HasFilter("is_deleted = false");
-
+        builder.HasIndex(u => u.UserExtId).IsUnique();
+        builder.HasIndex(u => u.NormalizedEmail).IsUnique().HasFilter("is_deleted = false");
         builder.HasIndex(u => u.IsActive).HasFilter("is_deleted = false");
+        builder.HasIndex(u => u.DepartmentId);
+
+        builder.HasOne(u => u.Department)
+            .WithMany()
+            .HasForeignKey(u => u.DepartmentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(u => u.UserRoles)
             .WithOne(ur => ur.User)

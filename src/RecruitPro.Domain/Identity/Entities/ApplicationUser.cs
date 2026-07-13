@@ -1,5 +1,6 @@
 using RecruitPro.Domain.Common;
 using RecruitPro.Domain.Common.Exceptions;
+using RecruitPro.Domain.Recruitment.Entities;
 
 namespace RecruitPro.Domain.Identity.Entities;
 
@@ -8,12 +9,20 @@ public sealed class ApplicationUser : BaseEntity
     private const int MaxFailedAccessAttempts = 5;
     private static readonly TimeSpan BaseLockoutDuration = TimeSpan.FromMinutes(15);
 
+    public Guid UserExtId { get; private set; } = Guid.NewGuid();
+    public Guid? DepartmentId { get; private set; }
+    public Department? Department { get; private set; }
+
     public string Email { get; private set; } = default!;
     public string NormalizedEmail { get; private set; } = default!;
     public string PasswordHash { get; private set; } = default!;
     public string FirstName { get; private set; } = default!;
-    public string LastName { get; private set; } = default!;
+    public string? LastName { get; private set; }
+    public string? Phone { get; private set; }
     public bool IsActive { get; private set; } = true;
+    public bool EmailVerified { get; private set; }
+    public bool TwoFactorEnabled { get; private set; }
+    public DateTimeOffset? LastLoginAt { get; private set; }
 
     public int AccessFailedCount { get; private set; }
     public int LockoutCount { get; private set; }
@@ -27,7 +36,7 @@ public sealed class ApplicationUser : BaseEntity
 
     private ApplicationUser() { } // EF Core
 
-    public static ApplicationUser Create(string email, string passwordHash, string firstName, string lastName)
+    public static ApplicationUser Create(string email, string passwordHash, string firstName, string? lastName = null, Guid? departmentId = null)
     {
         return new ApplicationUser
         {
@@ -36,15 +45,12 @@ public sealed class ApplicationUser : BaseEntity
             PasswordHash = passwordHash,
             FirstName = firstName,
             LastName = lastName,
+            DepartmentId = departmentId,
         };
     }
 
     public bool IsLockedOut(DateTimeOffset now) => LockoutEnd is not null && LockoutEnd > now;
 
-    /// <summary>
-    /// Failed-attempt lockout follows the blueprint's password policy: 5 failed attempts trigger
-    /// a lockout, with exponential backoff (15m, 30m, 60m, ...) on repeated lockouts.
-    /// </summary>
     public void RegisterFailedLoginAttempt(DateTimeOffset now)
     {
         if (IsLockedOut(now))
@@ -59,10 +65,11 @@ public sealed class ApplicationUser : BaseEntity
         AccessFailedCount = 0;
     }
 
-    public void RegisterSuccessfulLogin()
+    public void RegisterSuccessfulLogin(DateTimeOffset now)
     {
         AccessFailedCount = 0;
         LockoutEnd = null;
+        LastLoginAt = now;
     }
 
     public void ChangePasswordHash(string newPasswordHash) => PasswordHash = newPasswordHash;

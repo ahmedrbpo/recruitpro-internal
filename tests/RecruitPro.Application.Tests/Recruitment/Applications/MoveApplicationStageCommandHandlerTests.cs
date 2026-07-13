@@ -27,7 +27,15 @@ public sealed class MoveApplicationStageCommandHandlerTests
     [Fact]
     public async Task Handle_ValidTransition_MovesStageAndRecordsHistory()
     {
-        var job = Job.Create("Senior .NET Developer");
+        var job = Job.Create(
+            jobCode: "RP-2026-000001",
+            title: "Senior .NET Developer",
+            description: "Full job description.",
+            employmentType: EmploymentType.FullTime,
+            workMode: WorkMode.Remote,
+            experienceMin: 3,
+            experienceMax: 6,
+            currencyCode: "INR");
         var candidate = Candidate.Create("Ada", "Recruiter", "ada@example.com");
         _db.Jobs.Add(job);
         _db.Candidates.Add(candidate);

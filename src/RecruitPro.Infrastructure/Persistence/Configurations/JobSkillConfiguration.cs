@@ -11,9 +11,14 @@ public sealed class JobSkillConfiguration : IEntityTypeConfiguration<JobSkill>
         builder.ToTable("job_skills");
         builder.HasKey(s => s.Id);
 
-        builder.Property(s => s.Name).HasMaxLength(100).IsRequired();
         builder.Property(s => s.RowVersion).IsConcurrencyToken();
 
-        builder.HasIndex(s => new { s.JobId, s.Name }).IsUnique().HasFilter("is_deleted = false");
+        builder.HasIndex(s => new { s.JobId, s.SkillId }).IsUnique().HasFilter("is_deleted = false");
+        builder.HasIndex(s => s.SkillId);
+
+        builder.HasOne(s => s.Skill)
+            .WithMany()
+            .HasForeignKey(s => s.SkillId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

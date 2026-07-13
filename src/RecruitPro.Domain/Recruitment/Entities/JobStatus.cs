@@ -1,7 +1,12 @@
 namespace RecruitPro.Domain.Recruitment.Entities;
 
-public static class JobStatus
+public enum JobStatus
 {
-    public const string Draft = "draft";
-    public const string Published = "published";
+    Draft,
+    PendingApproval,
+    Published,
+    OnHold,
+    Closed,
+    Archived,
+    Cancelled,
 }

@@ -1,16 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using RecruitPro.Application.Common.Interfaces;
 using RecruitPro.Domain.Common;
 
 namespace RecruitPro.Infrastructure.Persistence.Interceptors;
 
 /// <summary>
-/// Converts every DbContext.Remove() into IsDeleted = true so application code never has to
-/// remember to soft-delete manually and a hard DELETE is not reachable through the ORM.
-/// Must run before AuditableEntitySaveChangesInterceptor so the audit log sees the converted
-/// Modified state rather than a Deleted one.
+/// Converts every DbContext.Remove() into IsDeleted = true (plus DeletedAt/DeletedBy) so
+/// application code never has to remember to soft-delete manually and a hard DELETE is not
+/// reachable through the ORM. Must run before AuditableEntitySaveChangesInterceptor so the audit
+/// log sees the converted Modified state rather than a Deleted one.
 /// </summary>
-public sealed class SoftDeleteInterceptor : SaveChangesInterceptor
+public sealed class SoftDeleteInterceptor(ICurrentUserService currentUserService, IDateTimeProvider dateTimeProvider)
+    : SaveChangesInterceptor
 {
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
@@ -25,7 +27,7 @@ public sealed class SoftDeleteInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private static void ConvertDeletesToSoftDeletes(DbContext? context)
+    private void ConvertDeletesToSoftDeletes(DbContext? context)
     {
         if (context is null) return;
 
@@ -35,6 +37,8 @@ public sealed class SoftDeleteInterceptor : SaveChangesInterceptor
 
             entry.State = EntityState.Modified;
             entry.Entity.IsDeleted = true;
+            entry.Entity.DeletedAt = dateTimeProvider.UtcNow;
+            entry.Entity.DeletedBy = currentUserService.UserId;
         }
     }
 }

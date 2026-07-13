@@ -20,7 +20,12 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
 
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<JobSkill> JobSkills => Set<JobSkill>();
+    public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<Department> Departments => Set<Department>();
+    public DbSet<JobCategory> JobCategories => Set<JobCategory>();
+    public DbSet<Client> Clients => Set<Client>();
+    public DbSet<Recruiter> Recruiters => Set<Recruiter>();
+    public DbSet<Tag> Tags => Set<Tag>();
 
     public DbSet<Candidate> Candidates => Set<Candidate>();
     public DbSet<Resume> Resumes => Set<Resume>();
