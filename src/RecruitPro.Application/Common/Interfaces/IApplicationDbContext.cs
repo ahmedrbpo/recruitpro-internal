@@ -29,5 +29,9 @@ public interface IApplicationDbContext
     DbSet<JobApplication> Applications { get; }
     DbSet<ApplicationStageHistory> ApplicationStageHistories { get; }
 
+    DbSet<Interview> Interviews { get; }
+    DbSet<InterviewFeedback> InterviewFeedbacks { get; }
+    DbSet<Offer> Offers { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

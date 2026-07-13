@@ -65,7 +65,13 @@ builder.Services
 
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // Fail closed: any endpoint without an explicit [AllowAnonymous] or [RequirePermission]
+    // requires at least a valid JWT by default, instead of being silently public if a future
+    // controller action forgets to add an authorization attribute.
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+});
 
 var app = builder.Build();
 
