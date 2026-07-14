@@ -13,6 +13,11 @@ public sealed class JobApplicationConfiguration : IEntityTypeConfiguration<JobAp
         builder.HasKey(a => a.Id);
 
         builder.Property(a => a.Stage).HasMaxLength(30).IsRequired();
+        builder.Property(a => a.WorkType).HasConversion<string>().HasMaxLength(20);
+        builder.Property(a => a.InterviewType).HasConversion<string>().HasMaxLength(20);
+        builder.Property(a => a.CurrentCTC).HasColumnType("numeric(12,2)");
+        builder.Property(a => a.ExpectedCTC).HasColumnType("numeric(12,2)");
+        builder.Property(a => a.UANNumber).HasMaxLength(20);
         builder.Property(a => a.RowVersion).IsConcurrencyToken();
 
         builder.HasIndex(a => a.JobId);

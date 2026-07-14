@@ -109,6 +109,21 @@ public sealed class JobApplicationTests
             h.FromStage == ApplicationStage.Applied && h.ToStage == ApplicationStage.Screening);
     }
 
+    [Fact]
+    public void SetSubmissionDetails_SetsAllFields()
+    {
+        var application = JobApplication.Create(Guid.NewGuid(), Guid.NewGuid());
+
+        application.SetSubmissionDetails(ApplicationWorkType.Hybrid, ApplicationInterviewType.Virtual,
+            1_200_000m, 1_500_000m, "123456789012");
+
+        application.WorkType.Should().Be(ApplicationWorkType.Hybrid);
+        application.InterviewType.Should().Be(ApplicationInterviewType.Virtual);
+        application.CurrentCTC.Should().Be(1_200_000m);
+        application.ExpectedCTC.Should().Be(1_500_000m);
+        application.UANNumber.Should().Be("123456789012");
+    }
+
     private static JobApplication CreateApplicationAt(string stage)
     {
         var application = JobApplication.Create(Guid.NewGuid(), Guid.NewGuid());

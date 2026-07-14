@@ -11,7 +11,10 @@ public sealed class GetCandidateProfileQueryHandler(IApplicationDbContext db)
 {
     public async Task<Result<CandidateDto>> Handle(GetCandidateProfileQuery request, CancellationToken cancellationToken)
     {
-        var candidate = await db.Candidates.AsNoTracking().Include(c => c.Resumes)
+        var candidate = await db.Candidates.AsNoTracking()
+            .Include(c => c.Resumes)
+            .Include(c => c.Educations)
+            .Include(c => c.EmploymentHistories)
             .SingleOrDefaultAsync(c => c.Id == request.CandidateId, cancellationToken);
 
         return candidate is null

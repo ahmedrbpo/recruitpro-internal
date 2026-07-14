@@ -31,6 +31,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
 
     public DbSet<Candidate> Candidates => Set<Candidate>();
     public DbSet<Resume> Resumes => Set<Resume>();
+    public DbSet<CandidateEducation> CandidateEducations => Set<CandidateEducation>();
+    public DbSet<CandidateEmploymentHistory> CandidateEmploymentHistories => Set<CandidateEmploymentHistory>();
 
     public DbSet<JobApplication> Applications => Set<JobApplication>();
     public DbSet<ApplicationStageHistory> ApplicationStageHistories => Set<ApplicationStageHistory>();

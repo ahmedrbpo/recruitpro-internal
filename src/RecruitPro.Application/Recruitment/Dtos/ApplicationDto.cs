@@ -9,6 +9,11 @@ public sealed record ApplicationDto(
     Guid JobId,
     Guid CandidateId,
     string Stage,
+    ApplicationWorkType? WorkType,
+    ApplicationInterviewType? InterviewType,
+    decimal? CurrentCTC,
+    decimal? ExpectedCTC,
+    string? UANNumber,
     IReadOnlyCollection<ApplicationStageHistoryDto> StageHistory)
 {
     public static ApplicationDto FromEntity(JobApplication application) =>
@@ -17,6 +22,11 @@ public sealed record ApplicationDto(
             application.JobId,
             application.CandidateId,
             application.Stage,
+            application.WorkType,
+            application.InterviewType,
+            application.CurrentCTC,
+            application.ExpectedCTC,
+            application.UANNumber,
             application.StageHistory
                 .OrderBy(h => h.ChangedAt)
                 .Select(h => new ApplicationStageHistoryDto(h.FromStage, h.ToStage, h.ChangedAt))

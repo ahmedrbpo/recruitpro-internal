@@ -22,6 +22,12 @@ public sealed class JobApplication : BaseEntity
 
     public string Stage { get; private set; } = ApplicationStage.Applied;
 
+    public ApplicationWorkType? WorkType { get; private set; }
+    public ApplicationInterviewType? InterviewType { get; private set; }
+    public decimal? CurrentCTC { get; private set; }
+    public decimal? ExpectedCTC { get; private set; }
+    public string? UANNumber { get; private set; }
+
     private readonly List<ApplicationStageHistory> _stageHistory = [];
     public IReadOnlyCollection<ApplicationStageHistory> StageHistory => _stageHistory.AsReadOnly();
 
@@ -48,5 +54,15 @@ public sealed class JobApplication : BaseEntity
         _stageHistory.Add(ApplicationStageHistory.Create(Id, Stage, newStage, now, changedBy));
         Stage = newStage;
         AddDomainEvent(new ApplicationStageChangedEvent(Id, CandidateId, JobId, previousStage, newStage));
+    }
+
+    public void SetSubmissionDetails(ApplicationWorkType workType, ApplicationInterviewType interviewType,
+        decimal currentCTC, decimal expectedCTC, string? uanNumber)
+    {
+        WorkType = workType;
+        InterviewType = interviewType;
+        CurrentCTC = currentCTC;
+        ExpectedCTC = expectedCTC;
+        UANNumber = uanNumber;
     }
 }
