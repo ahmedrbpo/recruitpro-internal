@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RecruitPro.Api.Common;
 using RecruitPro.Application.Common.Models;
 using RecruitPro.Application.Identity.Commands.Login;
@@ -12,8 +13,12 @@ namespace RecruitPro.Api.Controllers;
 
 public sealed record LoginRequest(string Email, string Password);
 
+// Stricter per-IP sliding window than the general API's per-user token bucket — auth endpoints
+// are the brute-force/credential-stuffing surface, and callers here aren't authenticated yet
+// (no user identity to partition by).
 [Route("api/v1/auth")]
 [AllowAnonymous]
+[EnableRateLimiting("AuthPolicy")]
 public sealed class AuthController(ISender mediator) : ApiControllerBase
 {
     private const string RefreshTokenCookieName = "refreshToken";

@@ -1,7 +1,10 @@
+using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RecruitPro.Api.Authorization;
@@ -82,6 +85,42 @@ builder.Services
         };
     });
 
+// Per CLAUDE.md: per-IP sliding window on auth endpoints (stricter — brute-force surface),
+// per-user token bucket on general API endpoints (falls back to per-IP for anonymous callers,
+// e.g. before UseAuthentication runs or on public endpoints).
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var userId = context.User.Identity?.IsAuthenticated == true
+            ? context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            : null;
+        var partitionKey = userId is not null ? $"user:{userId}" : $"ip:{context.Connection.RemoteIpAddress}";
+
+        return RateLimitPartition.GetTokenBucketLimiter(partitionKey, _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 100,
+            TokensPerPeriod = 20,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(10),
+            QueueLimit = 0,
+            AutoReplenishment = true,
+        });
+    });
+
+    options.AddPolicy("AuthPolicy", context =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 4,
+                QueueLimit = 0,
+            }));
+});
+
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 builder.Services.AddAuthorization(options =>
@@ -104,7 +143,10 @@ if (string.IsNullOrEmpty(app.Configuration["Jwt:Secret"]))
         "It must never be committed to appsettings.json.");
 }
 
-// Registered first so it wraps every other middleware, including auth failures further down.
+// Registered first so it wraps every other middleware, including error responses from
+// ExceptionHandlingMiddleware further down — security headers should apply to those too.
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Enabled in every environment (not gated to Development): every endpoint requires a Bearer
@@ -113,6 +155,9 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 // reading the source, since there's no browsable directory listing otherwise.
 app.UseSwagger();
 app.UseSwaggerUI();
+
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
 
 app.UseHttpsRedirection();
 
@@ -126,6 +171,11 @@ app.UseStaticFiles();
 
 app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
+
+// After UseAuthentication (needs the ClaimsPrincipal populated to partition by user), before
+// UseAuthorization (no reason a rate-limited-out caller should also pay for a permission check).
+app.UseRateLimiter();
+
 app.UseAuthorization();
 app.MapControllers();
 
