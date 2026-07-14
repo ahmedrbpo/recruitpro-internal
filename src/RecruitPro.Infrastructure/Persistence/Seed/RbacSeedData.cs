@@ -56,13 +56,15 @@ internal static class RbacSeedData
         "Reporting.Dashboard.View",
     ];
 
-    private sealed record RoleDefinition(string Name, string Code, string Description, bool IsSystem, Guid Id, string[] PermissionNames, bool AlreadyExists = false);
+    private sealed record RoleDefinition(string Name, string Code, string Description, bool IsSystem, Guid Id, string[] PermissionNames);
 
-    // Recruiter already existed before this migration (created ad hoc across earlier phases) —
-    // its Id is pinned to the live value so its RolePermission rows attach to the same role
-    // identity (keeping the existing UserRole assignment for recruiter@coventine.com valid), but
-    // AlreadyExists=true excludes it from the Role HasData itself: this migration must not try to
-    // insert a row that's already there.
+    // A fresh database (a new clone, CI's ephemeral Testcontainers Postgres) has no Recruiter row
+    // at all, so this migration must create one like every other role — HasData always inserts,
+    // it can't conditionally skip a row. The Id is pinned to the value already live in this
+    // project's shared dev database (created ad hoc in an earlier session before this migration
+    // existed) purely so that applying this migration there re-establishes the same role identity
+    // rather than a different one; see the PR description for the one-time manual reconciliation
+    // that database needed (delete + reapply + restore the UserRole assignment).
     private static readonly Guid RecruiterRoleId = Guid.Parse("05921db2-b8f5-462c-9ea5-57ca2d13794e");
 
     private static readonly RoleDefinition[] Roles =
@@ -120,8 +122,7 @@ internal static class RbacSeedData
                 "Recruitment.Application.Create", "Recruitment.Application.View", "Recruitment.Application.MoveStage",
                 "Recruitment.Interview.Schedule", "Recruitment.Interview.View", "Recruitment.Interview.RecordFeedback",
                 "Recruitment.Offer.View",
-            ],
-            AlreadyExists: true),
+            ]),
 
         new("Profile Uploader", "PROFILE_UPLOADER",
             "Prepares complete candidate records for recruiters.",
@@ -144,7 +145,7 @@ internal static class RbacSeedData
         }).ToList();
 
     public static IReadOnlyCollection<Role> GetRoles() =>
-        Roles.Where(r => !r.AlreadyExists).Select(r =>
+        Roles.Select(r =>
         {
             var role = Role.Create(r.Name, r.Code, r.Description, r.IsSystem);
             Stamp(role, r.Id);

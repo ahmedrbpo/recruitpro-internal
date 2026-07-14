@@ -12,7 +12,7 @@ using RecruitPro.Infrastructure.Persistence;
 namespace RecruitPro.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260714063810_SeedRolesAndPermissions")]
+    [Migration("20260714073011_SeedRolesAndPermissions")]
     partial class SeedRolesAndPermissions
     {
         /// <inheritdoc />
@@ -855,6 +855,19 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                             Name = "Team Leader",
                             RoleExtId = new Guid("0b0fc593-aba9-74c4-edeb-efce2a76188c"),
                             RowVersion = new byte[] { 22, 47, 216, 143, 32, 98, 122, 176, 55, 103, 24, 109, 129, 2, 214, 175 }
+                        },
+                        new
+                        {
+                            Id = new Guid("05921db2-b8f5-462c-9ea5-57ca2d13794e"),
+                            Code = "RECRUITER",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Description = "Sources, evaluates, and submits qualified candidates.",
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsSystem = false,
+                            Name = "Recruiter",
+                            RoleExtId = new Guid("f8e07652-578f-021e-a92a-465693fffc4c"),
+                            RowVersion = new byte[] { 178, 29, 146, 5, 245, 184, 44, 70, 158, 165, 87, 202, 45, 19, 121, 78 }
                         },
                         new
                         {

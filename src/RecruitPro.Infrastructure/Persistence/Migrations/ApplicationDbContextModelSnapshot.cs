@@ -855,6 +855,19 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                         },
                         new
                         {
+                            Id = new Guid("05921db2-b8f5-462c-9ea5-57ca2d13794e"),
+                            Code = "RECRUITER",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Description = "Sources, evaluates, and submits qualified candidates.",
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsSystem = false,
+                            Name = "Recruiter",
+                            RoleExtId = new Guid("f8e07652-578f-021e-a92a-465693fffc4c"),
+                            RowVersion = new byte[] { 178, 29, 146, 5, 245, 184, 44, 70, 158, 165, 87, 202, 45, 19, 121, 78 }
+                        },
+                        new
+                        {
                             Id = new Guid("d649856a-053e-1937-04ea-e899c6041d40"),
                             Code = "PROFILE_UPLOADER",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),

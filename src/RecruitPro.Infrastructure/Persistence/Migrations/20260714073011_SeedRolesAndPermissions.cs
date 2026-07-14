@@ -60,6 +60,7 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                 columns: new[] { "id", "code", "created_at", "created_by", "deleted_at", "deleted_by", "description", "is_active", "is_deleted", "is_system", "modified_at", "modified_by", "name", "role_ext_id", "row_version" },
                 values: new object[,]
                 {
+                    { new Guid("05921db2-b8f5-462c-9ea5-57ca2d13794e"), "RECRUITER", new DateTimeOffset(new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, null, "Sources, evaluates, and submits qualified candidates.", true, false, false, null, null, "Recruiter", new Guid("f8e07652-578f-021e-a92a-465693fffc4c"), new byte[] { 178, 29, 146, 5, 245, 184, 44, 70, 158, 165, 87, 202, 45, 19, 121, 78 } },
                     { new Guid("4eaf3e0e-0f8e-e7a1-33fb-ebb8807730b8"), "ACCOUNT_MANAGER", new DateTimeOffset(new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, null, "Primary liaison between client and delivery organization.", true, false, false, null, null, "Account Manager", new Guid("bf6e03a5-6cef-04ab-7b76-0c51ec4a9baa"), new byte[] { 14, 62, 175, 78, 142, 15, 161, 231, 51, 251, 235, 184, 128, 119, 48, 184 } },
                     { new Guid("8fd82f16-6220-b07a-3767-186d8102d6af"), "TEAM_LEADER", new DateTimeOffset(new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, null, "Leads recruiters and ensures timely delivery against assigned requisitions.", true, false, false, null, null, "Team Leader", new Guid("0b0fc593-aba9-74c4-edeb-efce2a76188c"), new byte[] { 22, 47, 216, 143, 32, 98, 122, 176, 55, 103, 24, 109, 129, 2, 214, 175 } },
                     { new Guid("d649856a-053e-1937-04ea-e899c6041d40"), "PROFILE_UPLOADER", new DateTimeOffset(new DateTime(2026, 7, 14, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, null, null, "Prepares complete candidate records for recruiters.", true, false, false, null, null, "Profile Uploader", new Guid("10f8421b-1120-5697-ad82-8ece89561ba8"), new byte[] { 106, 133, 73, 214, 62, 5, 55, 25, 4, 234, 232, 153, 198, 4, 29, 64 } },
@@ -702,6 +703,11 @@ namespace RecruitPro.Infrastructure.Persistence.Migrations
                 table: "permissions",
                 keyColumn: "id",
                 keyValue: new Guid("feb91607-53a4-6736-3e7c-369172310890"));
+
+            migrationBuilder.DeleteData(
+                table: "roles",
+                keyColumn: "id",
+                keyValue: new Guid("05921db2-b8f5-462c-9ea5-57ca2d13794e"));
 
             migrationBuilder.DeleteData(
                 table: "roles",
