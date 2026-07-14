@@ -107,11 +107,12 @@ if (string.IsNullOrEmpty(app.Configuration["Jwt:Secret"]))
 // Registered first so it wraps every other middleware, including auth failures further down.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Enabled in every environment (not gated to Development): every endpoint requires a Bearer
+// token to actually call per the FallbackPolicy above, so exposing the route/schema catalog
+// here doesn't grant access to anything — it's the only way to discover the API surface without
+// reading the source, since there's no browsable directory listing otherwise.
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseCors(FrontendCorsPolicy);
