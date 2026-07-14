@@ -5,6 +5,7 @@ using RecruitPro.Domain.Common;
 using RecruitPro.Domain.Identity.Entities;
 using RecruitPro.Domain.Notifications.Entities;
 using RecruitPro.Domain.Recruitment.Entities;
+using RecruitPro.Infrastructure.Persistence.Seed;
 
 namespace RecruitPro.Infrastructure.Persistence;
 
@@ -62,6 +63,13 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             // a non-default key looks like "already exists" unless told otherwise.
             builder.Entity(entityType.ClrType).Property(nameof(BaseEntity.Id)).ValueGeneratedNever();
         }
+
+        // The RecruitPro Roles & Responsibilities org-hierarchy document, seeded here so a fresh
+        // database gets these roles/permissions automatically via `dotnet ef database update`
+        // instead of requiring the ad-hoc scratch-script grants every earlier phase relied on.
+        builder.Entity<Permission>().HasData(RbacSeedData.GetPermissions());
+        builder.Entity<Role>().HasData(RbacSeedData.GetRoles());
+        builder.Entity<RolePermission>().HasData(RbacSeedData.GetRolePermissions());
 
         base.OnModelCreating(builder);
     }
