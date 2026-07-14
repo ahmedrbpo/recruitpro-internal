@@ -45,11 +45,15 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // AllowCredentials requires an explicit origin list (not AllowAnyOrigin) because the frontend's
 // refresh flow relies on the httpOnly refresh-token cookie, which browsers only attach to
 // cross-origin requests when credentialed CORS is set up this way.
+// Origins come from config (Cors:AllowedOrigins), not a hardcoded literal, so adding the
+// production frontend's domain is a host config change, not a code redeploy.
 const string FrontendCorsPolicy = "Frontend";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["https://localhost:5173"];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy => policy
-        .WithOrigins("https://localhost:5173")
+        .WithOrigins(allowedOrigins)
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials());
