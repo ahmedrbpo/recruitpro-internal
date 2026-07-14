@@ -42,6 +42,19 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// AllowCredentials requires an explicit origin list (not AllowAnyOrigin) because the frontend's
+// refresh flow relies on the httpOnly refresh-token cookie, which browsers only attach to
+// cross-origin requests when credentialed CORS is set up this way.
+const string FrontendCorsPolicy = "Frontend";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(FrontendCorsPolicy, policy => policy
+        .WithOrigins("https://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
+});
+
 // Read lazily inside the options callback (not eagerly here): WebApplicationFactory's test
 // config overrides are only merged into builder.Configuration during builder.Build(), so an
 // eager read at this point would miss them and see only "real" config sources.
@@ -97,6 +110,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
