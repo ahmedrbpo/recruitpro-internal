@@ -26,6 +26,8 @@ public interface IApplicationDbContext
 
     DbSet<Candidate> Candidates { get; }
     DbSet<Resume> Resumes { get; }
+    DbSet<CandidateEducation> CandidateEducations { get; }
+    DbSet<CandidateEmploymentHistory> CandidateEmploymentHistories { get; }
 
     DbSet<JobApplication> Applications { get; }
     DbSet<ApplicationStageHistory> ApplicationStageHistories { get; }

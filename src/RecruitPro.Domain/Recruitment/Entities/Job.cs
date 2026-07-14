@@ -19,6 +19,7 @@ public sealed class Job : BaseEntity
     public string CurrencyCode { get; private set; } = default!;
     public DateOnly? PublishedDate { get; private set; }
     public string? Notes { get; private set; }
+    public OnboardingType? Onboarding { get; private set; }
 
     public Guid? ClientId { get; private set; }
     public Guid? JobCategoryId { get; private set; }
@@ -70,6 +71,11 @@ public sealed class Job : BaseEntity
     {
         SalaryMin = range.Min;
         SalaryMax = range.Max;
+    }
+
+    public void SetOnboarding(OnboardingType onboarding)
+    {
+        Onboarding = onboarding;
     }
 
     /// <summary>Enforces the invariant that a job must have a salary range before it goes live.</summary>

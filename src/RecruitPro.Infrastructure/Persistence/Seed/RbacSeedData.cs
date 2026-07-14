@@ -33,6 +33,7 @@ internal static class RbacSeedData
         "Recruitment.Application.MoveStage",
         "Recruitment.Application.View",
         "Recruitment.Candidate.Create",
+        "Recruitment.Candidate.Update",
         "Recruitment.Candidate.View",
         "Recruitment.Client.Create",
         "Recruitment.Client.View",
@@ -117,7 +118,7 @@ internal static class RbacSeedData
             PermissionNames:
             [
                 "Recruitment.Job.View",
-                "Recruitment.Candidate.Create", "Recruitment.Candidate.View",
+                "Recruitment.Candidate.Create", "Recruitment.Candidate.Update", "Recruitment.Candidate.View",
                 "Recruitment.Resume.Upload", "Recruitment.Resume.Download",
                 "Recruitment.Application.Create", "Recruitment.Application.View", "Recruitment.Application.MoveStage",
                 "Recruitment.Interview.Schedule", "Recruitment.Interview.View", "Recruitment.Interview.RecordFeedback",
@@ -130,7 +131,7 @@ internal static class RbacSeedData
             Id: DeterministicGuid.Create("Role.PROFILE_UPLOADER"),
             PermissionNames:
             [
-                "Recruitment.Candidate.Create", "Recruitment.Candidate.View",
+                "Recruitment.Candidate.Create", "Recruitment.Candidate.Update", "Recruitment.Candidate.View",
                 "Recruitment.Resume.Upload", "Recruitment.Resume.Download",
             ]),
     ];

@@ -23,6 +23,7 @@ public sealed class JobConfiguration : IEntityTypeConfiguration<Job>
         builder.Property(j => j.SalaryMax).HasColumnType("numeric(12,2)");
         builder.Property(j => j.CurrencyCode).HasMaxLength(3).IsRequired();
         builder.Property(j => j.PublishedDate).HasColumnType("date");
+        builder.Property(j => j.Onboarding).HasConversion<string>().HasMaxLength(30);
         builder.Property(j => j.RowVersion).IsConcurrencyToken();
 
         builder.HasIndex(j => j.JobCode).IsUnique().HasFilter("is_deleted = false");

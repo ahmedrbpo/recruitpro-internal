@@ -9,9 +9,12 @@ using RecruitPro.Application.Recruitment.Jobs.CreateJob;
 using RecruitPro.Application.Recruitment.Jobs.GetJobById;
 using RecruitPro.Application.Recruitment.Jobs.GetJobsPaginated;
 using RecruitPro.Application.Recruitment.Jobs.PublishJob;
+using RecruitPro.Application.Recruitment.Jobs.SetOnboarding;
 using RecruitPro.Domain.Recruitment.Entities;
 
 namespace RecruitPro.Api.Controllers;
+
+public sealed record SetOnboardingRequest(OnboardingType Onboarding);
 
 public sealed record CreateJobRequest(
     string JobCode,
@@ -81,6 +84,14 @@ public sealed class JobsController(ISender mediator) : ApiControllerBase
     public async Task<ActionResult<ApiResponse<JobDto>>> Publish(Guid id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new PublishJobCommand(id), cancellationToken);
+        return HandleResult(result);
+    }
+
+    [HttpPatch("{id:guid}/onboarding")]
+    [RequirePermission("Recruitment.Job.Create")]
+    public async Task<ActionResult<ApiResponse<JobDto>>> SetOnboarding(Guid id, SetOnboardingRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new SetOnboardingCommand(id, request.Onboarding), cancellationToken);
         return HandleResult(result);
     }
 

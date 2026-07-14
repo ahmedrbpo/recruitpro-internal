@@ -55,6 +55,16 @@ public sealed class JobTests
     }
 
     [Fact]
+    public void SetOnboarding_SetsOnboardingType()
+    {
+        var job = CreateJob();
+
+        job.SetOnboarding(OnboardingType.ContractToHire);
+
+        job.Onboarding.Should().Be(OnboardingType.ContractToHire);
+    }
+
+    [Fact]
     public void AddSkill_DuplicateSkillId_IsIgnored()
     {
         var job = CreateJob();
