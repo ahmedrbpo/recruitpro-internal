@@ -21,4 +21,17 @@ public sealed class Role : BaseEntity
 
     public static Role Create(string name, string code, string? description = null, bool isSystem = false) =>
         new() { Name = name, Code = code, Description = description, IsSystem = isSystem };
+
+    public void Activate() => IsActive = true;
+
+    public void Deactivate() => IsActive = false;
+
+    public void AddPermission(Guid permissionId)
+    {
+        if (_rolePermissions.Any(rp => rp.PermissionId == permissionId)) return;
+
+        _rolePermissions.Add(RolePermission.Create(Id, permissionId));
+    }
+
+    public void RemovePermission(Guid permissionId) => _rolePermissions.RemoveAll(rp => rp.PermissionId == permissionId);
 }

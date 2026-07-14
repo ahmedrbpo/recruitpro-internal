@@ -77,4 +77,50 @@ public sealed class ApplicationUserTests
         user.IsLockedOut(Now).Should().BeFalse();
         user.LastLoginAt.Should().Be(Now);
     }
+
+    [Fact]
+    public void Deactivate_ThenActivate_RestoresIsActive()
+    {
+        var user = ApplicationUser.Create("test@coventine.com", "hash", "Test", "User");
+
+        user.Deactivate();
+        user.IsActive.Should().BeFalse();
+
+        user.Activate();
+        user.IsActive.Should().BeTrue();
+    }
+
+    [Fact]
+    public void AddRole_CalledTwiceForSameRole_IsIdempotent()
+    {
+        var user = ApplicationUser.Create("test@coventine.com", "hash", "Test", "User");
+        var roleId = Guid.NewGuid();
+
+        user.AddRole(roleId);
+        user.AddRole(roleId);
+
+        user.UserRoles.Should().ContainSingle(ur => ur.RoleId == roleId);
+    }
+
+    [Fact]
+    public void RemoveRole_RemovesTheAssignment()
+    {
+        var user = ApplicationUser.Create("test@coventine.com", "hash", "Test", "User");
+        var roleId = Guid.NewGuid();
+        user.AddRole(roleId);
+
+        user.RemoveRole(roleId);
+
+        user.UserRoles.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void RemoveRole_NotAssigned_IsANoOp()
+    {
+        var user = ApplicationUser.Create("test@coventine.com", "hash", "Test", "User");
+
+        var act = () => user.RemoveRole(Guid.NewGuid());
+
+        act.Should().NotThrow();
+    }
 }

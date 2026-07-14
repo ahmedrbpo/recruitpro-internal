@@ -76,6 +76,17 @@ public sealed class ApplicationUser : BaseEntity
 
     public void Deactivate() => IsActive = false;
 
+    public void Activate() => IsActive = true;
+
+    public void AddRole(Guid roleId)
+    {
+        if (_userRoles.Any(ur => ur.RoleId == roleId)) return;
+
+        _userRoles.Add(UserRole.Create(Id, roleId));
+    }
+
+    public void RemoveRole(Guid roleId) => _userRoles.RemoveAll(ur => ur.RoleId == roleId);
+
     public IEnumerable<string> GetPermissionNames() =>
         UserRoles
             .Select(ur => ur.Role)
