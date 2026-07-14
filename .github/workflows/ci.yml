@@ -26,6 +26,28 @@ jobs:
       - name: Run unit and integration tests
         run: dotnet test --no-build --configuration Release
 
+  frontend-build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - run: npx oxlint
+
+      - run: npm run build
+
+      - run: npm test
+
   # Runs on every PR (build-only, validates the Dockerfile) so it's safe to require as a status
   # check, but only pushes to GHCR on an actual push to master. The migrate-then-deploy step
   # against the real MonsterASP.NET target still needs to be filled in once hosting credentials
