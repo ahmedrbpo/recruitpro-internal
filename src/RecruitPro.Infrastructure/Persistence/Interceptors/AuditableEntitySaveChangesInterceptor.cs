@@ -75,14 +75,23 @@ public sealed class AuditableEntitySaveChangesInterceptor(
     {
         var diff = entry.Properties
             .Where(p => p.IsModified)
-            .ToDictionary(p => p.Metadata.Name, p => new { Old = p.OriginalValue, New = p.CurrentValue });
+            .ToDictionary(p => p.Metadata.Name, p => new { Old = Redact(p.Metadata.Name, p.OriginalValue), New = Redact(p.Metadata.Name, p.CurrentValue) });
 
         return JsonSerializer.Serialize(diff);
     }
 
     private static string SerializeCurrentValues(EntityEntry<BaseEntity> entry)
     {
-        var values = entry.Properties.ToDictionary(p => p.Metadata.Name, p => p.CurrentValue);
+        var values = entry.Properties.ToDictionary(p => p.Metadata.Name, p => Redact(p.Metadata.Name, p.CurrentValue));
         return JsonSerializer.Serialize(values);
     }
+
+    /// <summary>Audit rows are meant to be broadly readable (an AuditLogsController now exposes
+    /// them via the API), so secret-bearing columns must never round-trip into the Changes diff
+    /// even in hashed form — a password/token hash doesn't belong in a general-purpose audit
+    /// viewer just because the entity that owns it happened to change. Matches by suffix so any
+    /// future *Hash-named column (PasswordHash, TokenHash, ReplacedByTokenHash, ...) is covered
+    /// without needing to enumerate every entity here.</summary>
+    private static object? Redact(string propertyName, object? value) =>
+        propertyName.EndsWith("Hash", StringComparison.Ordinal) && value is not null ? "[REDACTED]" : value;
 }

@@ -24,4 +24,8 @@ public sealed class Permission : BaseEntity
 
     public static Permission Create(string name, string? resource = null, PermissionAction? action = null, string? description = null) =>
         new() { Name = name, Resource = resource, Action = action, Description = description };
+
+    public void Activate() => IsActive = true;
+
+    public void Deactivate() => IsActive = false;
 }
