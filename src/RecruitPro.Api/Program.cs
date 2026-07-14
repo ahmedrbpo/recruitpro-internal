@@ -115,10 +115,24 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+// Serves the built React SPA from wwwroot (copied there at publish time). Same-origin with the
+// API, not just same-site: the refresh-token cookie is SameSite=Strict, and Strict cookies are
+// never delivered cross-site regardless of HTTPS/CORS — that's what broke the earlier separate
+// Vercel deployment. Placed before UseAuthorization() so static assets bypass the endpoint
+// routing/auth pipeline entirely rather than tripping the fail-closed FallbackPolicy below.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Anonymous: client-side routes (e.g. /login, /jobs) have no matching controller action, so
+// without this the fail-closed FallbackPolicy above would 401 the SPA shell before its own JS
+// router ever got a chance to run.
+app.MapFallbackToFile("index.html").AllowAnonymous();
 
 app.MapHangfireDashboard("/hangfire", new DashboardOptions
 {
