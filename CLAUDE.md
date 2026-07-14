@@ -69,6 +69,33 @@ major releases.
 
 ## Subdirectory CLAUDE.md files
 
-Once the backend (`src/RecruitPro.*`) and frontend (`src/`) trees exist, consider adding
-module-specific CLAUDE.md files in subdirectories — they load automatically when Claude works
-in that directory.
+The backend lives under `src/RecruitPro.*`; the frontend is a separate Vite + React project
+under `web/` (not `src/`) to keep it clearly apart from the .NET solution. Consider adding
+module-specific CLAUDE.md files in subdirectories as they grow — they load automatically when
+Claude works in that directory.
+
+## Frontend (`web/`)
+
+React + Vite SPA per the blueprint's `src/app`, `src/features/*`, `src/shared` layout (mirrored
+under `web/src/`). TanStack Query for server state, Zustand for the auth store, axios for HTTP,
+Tailwind v4 (via `@tailwindcss/vite`, not a `tailwind.config.js`) for styling.
+
+- **Access token lives in memory only** (Zustand), never localStorage — the refresh token is an
+  httpOnly/Secure/SameSite=Strict cookie the API sets. A page reload loses the in-memory token by
+  design; `App.tsx` recovers it with one silent `POST /auth/refresh` on bootstrap.
+- **The dev server must run over HTTPS**, matching the API. Chrome's schemeful-same-site rules
+  treat `http://localhost:5173` and `https://localhost:7098` as different sites purely due to the
+  scheme mismatch, so the Secure+SameSite=Strict refresh cookie would never come back on an http
+  dev server. `vite.config.ts` reuses the ASP.NET Core dev cert (already trusted via
+  `dotnet dev-certs https --trust`) rather than a plugin-generated self-signed one, so there's no
+  separate browser trust prompt. Regenerate it with:
+  `dotnet dev-certs https -ep web/.certs/localhost.pem --format Pem --no-password`
+- **Error responses come in two different shapes** from the API and both must be handled:
+  `Result<T>` failures (validation, conflict, not-found) return the `{success,data,error,meta}`
+  envelope; thrown `DomainException`s are caught by `ExceptionHandlingMiddleware` and return RFC
+  7807 ProblemDetails (`{type,title,status,errorCode}`) instead. Always extract error messages via
+  `shared/lib/errors.ts`'s `getApiErrorMessage`, not by reaching into `error.response.data.error`
+  directly — a domain-rule violation like "publish a job with no salary range" only has a
+  `title`, not an `error.message`.
+- Run `npm test` (Vitest + React Testing Library) and `npm run build` (`tsc -b && vite build`)
+  before considering frontend work done.
