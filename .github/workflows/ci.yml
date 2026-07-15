@@ -49,9 +49,7 @@ jobs:
       - run: npm test
 
   # Runs on every PR (build-only, validates the Dockerfile) so it's safe to require as a status
-  # check, but only pushes to GHCR on an actual push to master. The migrate-then-deploy step
-  # against the real MonsterASP.NET target still needs to be filled in once hosting credentials
-  # exist — do not add fabricated secrets/deploy steps ahead of that.
+  # check, but only pushes to GHCR on an actual push to master.
   build-image:
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -73,3 +71,57 @@ jobs:
           context: .
           push: ${{ github.ref == 'refs/heads/master' }}
           tags: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+
+  # MonsterASP.NET is IIS/Windows WebDeploy hosting, not a Docker target — build-image above
+  # publishes an image nothing currently pulls. This job is the actual path to production:
+  # it needs a Windows runner (WebDeploy/win-x86), and since the API serves the SPA from its
+  # own wwwroot at the same origin (see Program.cs), the frontend has to be built and copied
+  # into the publish output's wwwroot before WebDeploy ships it — neither the csproj nor the
+  # Dockerfile do that step today, so it's done explicitly here.
+  #
+  # Requires four repo secrets from the MonsterASP.NET control panel (Hosting > WebDeploy):
+  # WEBSITE_NAME, SERVER_COMPUTER_NAME, SERVER_USERNAME, SERVER_PASSWORD.
+  deploy:
+    needs: [build-and-test, frontend-build-and-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build frontend
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      - name: Publish API
+        run: >
+          dotnet publish src/RecruitPro.Api/RecruitPro.Api.csproj
+          --configuration Release
+          --output ./publish
+          --runtime win-x86
+          --self-contained false
+
+      - name: Copy SPA build into published wwwroot
+        shell: bash
+        run: |
+          mkdir -p ./publish/wwwroot
+          cp -r web/dist/. ./publish/wwwroot/
+
+      - name: Deploy to MonsterASP.NET via WebDeploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
