@@ -105,12 +105,15 @@ jobs:
           npm run build
 
       - name: Publish API
+        # Portable, framework-dependent publish — no --runtime/--self-contained. Hardcoding a
+        # runtime identifier (win-x86, per MonsterASP.NET's example) assumes the app pool's
+        # bitness, which caused a CoreCLR load failure in production (32-bit build, 64-bit pool).
+        # A portable build lets IIS's dotnet.exe resolve the correct architecture at launch,
+        # same as the Dockerfile's publish step.
         run: >
           dotnet publish src/RecruitPro.Api/RecruitPro.Api.csproj
           --configuration Release
           --output ./publish
-          --runtime win-x86
-          --self-contained false
 
       - name: Copy SPA build into published wwwroot
         shell: bash
