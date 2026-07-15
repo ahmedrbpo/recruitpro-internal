@@ -3,6 +3,7 @@ import { useJobs } from '../hooks/useJobs'
 import { usePublishJob } from '../hooks/usePublishJob'
 import { DataTable } from '../../../shared/components/DataTable'
 import { Button } from '../../../shared/components/Button'
+import { Badge } from '../../../shared/components/Badge'
 import { CreateJobModal } from '../components/CreateJobModal'
 import { usePermission } from '../../../shared/hooks/usePermission'
 import { useAuth } from '../../auth/hooks/useAuth'
@@ -11,14 +12,16 @@ import type { Job } from '../types'
 
 const PAGE_SIZE = 20
 
-const statusBadgeClasses: Record<Job['status'], string> = {
-  Draft: 'bg-slate-100 text-slate-700',
-  PendingApproval: 'bg-amber-100 text-amber-700',
-  Published: 'bg-emerald-100 text-emerald-700',
-  OnHold: 'bg-amber-100 text-amber-700',
-  Closed: 'bg-slate-200 text-slate-600',
-  Archived: 'bg-slate-200 text-slate-600',
-  Cancelled: 'bg-red-100 text-red-700',
+// Status color coding per design.md §4: green = active/published, yellow = on hold/pending,
+// gray = draft/closed, red = cancelled/rejected.
+const statusTone: Record<Job['status'], 'blue' | 'green' | 'red' | 'yellow' | 'gray'> = {
+  Draft: 'gray',
+  PendingApproval: 'yellow',
+  Published: 'green',
+  OnHold: 'yellow',
+  Closed: 'gray',
+  Archived: 'gray',
+  Cancelled: 'red',
 }
 
 export function JobsListPage() {
@@ -41,12 +44,12 @@ export function JobsListPage() {
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Jobs</h1>
+            <h1 className="text-2xl font-semibold text-brand-700">Jobs</h1>
             <p className="text-sm text-slate-500">Signed in as {email}</p>
           </div>
           <div className="flex gap-2">
             {canCreate && <Button onClick={() => setIsCreateOpen(true)}>New job</Button>}
-            <Button variant="secondary" onClick={() => logout()}>
+            <Button variant="ghost" onClick={() => logout()}>
               Sign out
             </Button>
           </div>
@@ -69,11 +72,7 @@ export function JobsListPage() {
                 {
                   key: 'status',
                   header: 'Status',
-                  render: (job) => (
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClasses[job.status]}`}>
-                      {job.status}
-                    </span>
-                  ),
+                  render: (job) => <Badge tone={statusTone[job.status]}>{job.status}</Badge>,
                 },
                 { key: 'employmentType', header: 'Type', render: (job) => job.employmentType },
                 { key: 'workMode', header: 'Mode', render: (job) => job.workMode },
@@ -85,7 +84,8 @@ export function JobsListPage() {
                     canPublish && job.status === 'Draft' ? (
                       <Button
                         variant="secondary"
-                        disabled={publishJob.isPending}
+                        size="sm"
+                        isLoading={publishJob.isPending}
                         onClick={() => publishJob.mutate(job.id)}
                       >
                         Publish
