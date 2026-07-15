@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useJobs } from '../hooks/useJobs'
 import { usePublishJob } from '../hooks/usePublishJob'
 import { DataTable } from '../../../shared/components/DataTable'
@@ -31,6 +32,7 @@ export function JobsListPage() {
   const publishJob = usePublishJob()
   const canCreate = usePermission('Recruitment.Job.Create')
   const canPublish = usePermission('Recruitment.Job.Publish')
+  const canSubmitCandidate = usePermission('Recruitment.Candidate.Create')
   const { email, logout } = useAuth()
 
   const totalPages = data ? Math.max(1, Math.ceil(data.totalCount / data.pageSize)) : 1
@@ -80,17 +82,27 @@ export function JobsListPage() {
                 {
                   key: 'actions',
                   header: '',
-                  render: (job) =>
-                    canPublish && job.status === 'Draft' ? (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        isLoading={publishJob.isPending}
-                        onClick={() => publishJob.mutate(job.id)}
-                      >
-                        Publish
-                      </Button>
-                    ) : null,
+                  render: (job) => (
+                    <div className="flex gap-2">
+                      {canPublish && job.status === 'Draft' && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          isLoading={publishJob.isPending}
+                          onClick={() => publishJob.mutate(job.id)}
+                        >
+                          Publish
+                        </Button>
+                      )}
+                      {canSubmitCandidate && (
+                        <Link to={`/jobs/${job.id}/candidates/new`}>
+                          <Button variant="secondary" size="sm">
+                            Submit candidate
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  ),
                 },
               ]}
               rows={data.items}

@@ -19,6 +19,12 @@ export async function getJobs(page: number, pageSize: number): Promise<JobsPage>
   }
 }
 
+export async function getJob(id: string): Promise<Job> {
+  const response = await apiClient.get<ApiResponse<Job>>(`/jobs/${id}`)
+  if (!response.data.data) throw new Error(response.data.error?.message ?? 'Failed to load job.')
+  return response.data.data
+}
+
 export async function createJob(request: CreateJobRequest): Promise<Job> {
   const response = await apiClient.post<ApiResponse<Job>>('/jobs', request)
   if (!response.data.data) throw new Error(response.data.error?.message ?? 'Failed to create job.')

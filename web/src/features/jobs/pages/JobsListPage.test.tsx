@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { JobsListPage } from './JobsListPage'
 import { useJobs } from '../hooks/useJobs'
@@ -44,7 +45,9 @@ function renderJobsListPage() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={queryClient}>
-      <JobsListPage />
+      <MemoryRouter>
+        <JobsListPage />
+      </MemoryRouter>
     </QueryClientProvider>,
   )
 }
