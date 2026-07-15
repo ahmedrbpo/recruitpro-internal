@@ -82,7 +82,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
   }
 
   return (
-    <Modal title="Create job" isOpen={isOpen} onClose={resetAndClose}>
+    <Modal title="Create job" isOpen={isOpen} onClose={resetAndClose} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
           <FormField label="Job code" htmlFor="jobCode">
@@ -91,7 +91,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               required
               value={jobCode}
               onChange={(event) => setJobCode(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             />
           </FormField>
           <FormField label="Currency" htmlFor="currencyCode">
@@ -100,7 +100,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               required
               value={currencyCode}
               onChange={(event) => setCurrencyCode(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             />
           </FormField>
         </div>
@@ -132,7 +132,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               id="employmentType"
               value={employmentType}
               onChange={(event) => setEmploymentType(event.target.value as EmploymentType)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             >
               {employmentTypes.map((type) => (
                 <option key={type} value={type}>
@@ -146,7 +146,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               id="workMode"
               value={workMode}
               onChange={(event) => setWorkMode(event.target.value as WorkMode)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             >
               {workModes.map((mode) => (
                 <option key={mode} value={mode}>
@@ -166,7 +166,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               required
               value={experienceMin}
               onChange={(event) => setExperienceMin(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             />
           </FormField>
           <FormField label="Experience max (yrs)" htmlFor="experienceMax">
@@ -177,7 +177,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               required
               value={experienceMax}
               onChange={(event) => setExperienceMax(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             />
           </FormField>
         </div>
@@ -190,7 +190,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               min={0}
               value={salaryMin}
               onChange={(event) => setSalaryMin(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             />
           </FormField>
           <FormField label="Salary max (optional)" htmlFor="salaryMax">
@@ -200,7 +200,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
               min={0}
               value={salaryMax}
               onChange={(event) => setSalaryMax(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100"
             />
           </FormField>
         </div>
@@ -224,7 +224,7 @@ export function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
           <Button type="button" variant="secondary" onClick={resetAndClose}>
             Cancel
           </Button>
-          <Button type="submit" disabled={createJob.isPending}>
+          <Button type="submit" isLoading={createJob.isPending}>
             {createJob.isPending ? 'Creating…' : 'Create job'}
           </Button>
         </div>

@@ -16,7 +16,7 @@ interface DataTableProps<T> {
 export function DataTable<T>({ columns, rows, rowKey, emptyMessage = 'No records found.' }: DataTableProps<T>) {
   return (
     <table className="min-w-full divide-y divide-slate-200 text-sm">
-      <thead>
+      <thead className="bg-brand-50/60">
         <tr>
           {columns.map((column) => (
             <th key={column.key} className="px-3 py-2 text-left font-semibold text-slate-600">
@@ -34,7 +34,7 @@ export function DataTable<T>({ columns, rows, rowKey, emptyMessage = 'No records
           </tr>
         ) : (
           rows.map((row) => (
-            <tr key={rowKey(row)}>
+            <tr key={rowKey(row)} className="hover:bg-brand-50/40">
               {columns.map((column) => (
                 <td key={column.key} className="px-3 py-2 text-slate-800">
                   {column.render(row)}
