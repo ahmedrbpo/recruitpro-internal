@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { JobsListPage } from '../features/jobs/pages/JobsListPage'
+import { CandidateSubmissionPage } from '../features/candidates/pages/CandidateSubmissionPage'
 import { ProtectedRoute } from './ProtectedRoute'
 
 export const router = createBrowserRouter([
@@ -11,6 +12,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <JobsListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/jobs/:jobId/candidates/new',
+    element: (
+      <ProtectedRoute>
+        <CandidateSubmissionPage />
       </ProtectedRoute>
     ),
   },
